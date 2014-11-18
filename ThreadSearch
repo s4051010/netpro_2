@@ -1,0 +1,101 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package webbrowserthread;
+
+import java.awt.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Map;
+
+import javax.swing.*;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Santi
+ */
+public class ThreadSearch extends Thread
+{
+    String name;
+    JEditorPane content;
+    JTextPane status;
+    URL url; 
+
+    /**
+     *
+     * @param name
+     * @param url
+     * @param content
+     * @param status
+     */
+   ThreadSearch(String name, String url, JEditorPane content, JTextPane status) {
+        this.name = name;
+        this.content = content;
+        this.status = status;
+        try {
+            this.url = new URL(url);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(ThreadSearch.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    
+    @Override
+    public void run()
+    {
+        
+         String staname = name + " Start\n";
+            this.status.setText(staname);
+            try {
+                URLConnection conn = this.url.openConnection();
+                Map<String, java.util.List<String>> map = conn.getHeaderFields();
+                
+                staname += "Printing Response Header...\n";
+                
+                for (Map.Entry<String, java.util.List<String>> entry : map.entrySet()) {
+                    staname += entry.getKey() +":"+entry.getValue()+"\n";
+                }
+
+                staname += "\nGet Response Header By Key ...\n";
+                String server = conn.getHeaderField("Server");
+
+                if (server == null) {
+                    staname += "Key 'Server' is not found!";
+                } else {
+                    staname += "Server - " + server;
+                }
+                staname += "\n Done";
+                //Thread.sleep(5000);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            
+           this.status.setText(staname);
+            
+            try {
+                content.setPage(this.url);
+                //Thread.sleep(5000);
+            } catch (Exception e) {
+                // Show error messsage.
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                // Return to default cursor.
+               
+                staname += "\n" + name + " Stop";
+                this.status.setText(staname);
+            }
+       
+        
+        
+    }
+
+ 
+    
+}
